@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "./dist",
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "esModuleInterop": true
+  },
+  "include": ["./src/index.ts"],
+  "exclude": ["node_modules", "./src/**/*/test.ts"]
+}
