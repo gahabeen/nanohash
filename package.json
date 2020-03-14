@@ -2,7 +2,7 @@
   "name": "nanohash",
   "description": "Generate short unique ids with a corresponding 64bits-based numeric reversible value",
   "version": "0.0.11",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "keywords": [
     "uuid",
