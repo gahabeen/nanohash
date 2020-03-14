@@ -4,6 +4,13 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "keywords": [
+    "uuid",
+    "random",
+    "id",
+    "url",
+    "fauna"
+  ],
   "files": [
     "dist/index.js",
     "dist/index.browser.js"
