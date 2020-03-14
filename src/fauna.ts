@@ -2,7 +2,7 @@ interface FaunaScaffoldOptions {
   codetable?: any
 }
 
-export async function scaffold(q, { codetable }: FaunaScaffoldOptions = {}) {
+export async function scaffold(q: any, { codetable }: FaunaScaffoldOptions = {}) {
   codetable = codetable || {
     h00: '0',
     h01: '1',

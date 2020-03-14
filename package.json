@@ -11,15 +11,11 @@
     "url",
     "fauna"
   ],
-  "files": [
-    "dist/index.js",
-    "dist/index.browser.js"
-  ],
   "scripts": {
     "dev": "tsc -w",
     "gen-node": "tsc",
     "gen-browser": "tsc -p tsconfig.browser.json",
-    "gen": "yarn gen-node && yarn gen-browser",
+    "gen": "yarn gen-node",
     "test": "jest",
     "test:watch": "jest --watch",
     "pub": "yarn gen && yarn publish"

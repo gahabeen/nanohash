@@ -8,6 +8,6 @@
     "rootDir": "src",
     "esModuleInterop": true
   },
-  "include": ["./src/index.ts"],
+  "include": ["./src/index.ts", "./src/fauna.ts"],
   "exclude": ["node_modules", "./src/**/*/test.ts"]
 }

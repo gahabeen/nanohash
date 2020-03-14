@@ -93,13 +93,13 @@ export function nanohash(options?: nanohash.options) {
 
   alphabet = alphabet || Object.keys(hashtable).join('')
 
-  const codetable = Object.entries(hashtable).reduce((table, [key, code]) => {
+  const codetable = Object.entries(hashtable).reduce((table: any, [key, code]) => {
     table[code] = key
     return table
   }, {})
 
   function generate(): nanohash.ID {
-    return hash(nanoid(alphabet, size))
+    return hash(nanoid(alphabet as string, size))
   }
 
   function bulk(nb: number = 10): nanohash.ID[] {
@@ -126,12 +126,12 @@ export function nanohash(options?: nanohash.options) {
     )
   }
 
-  function dehash(id: nanohash.ID): nanohash.code {
-    try {
-      Number(id)
-    } catch (error) {
-      throw new Error(`ID ${id} can't be cast to Number. The ID must be wrong.`)
-    }
+  function dehash(id: nanohash.ID = ''): nanohash.code {
+    // try {
+    //   Number(id)
+    // } catch (error) {
+    //   throw new Error(`ID ${id} can't be cast to Number. The ID must be wrong.`)
+    // }
     return id
       .slice(1)
       .match(/.{1,2}/g)
