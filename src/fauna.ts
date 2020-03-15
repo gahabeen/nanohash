@@ -81,6 +81,20 @@ export async function scaffold(q: any, { codetable }: FaunaScaffoldOptions = {})
       name: 'nanohash.stringArray',
       body: q.Query(q.Lambda(['nb'], q.Call('nanohash.splitEvery', q.ToString(q.Var('nb')), '1')))
     }),
+    validReference: q.CreateFunction({
+      name: 'nanohash.validReference',
+      body: q.Query(
+        q.Lambda(
+          ['collection', 'ids'],
+          q.Let(
+            {
+              availableId: q.Select(0, q.Filter(q.Var('ids'), q.Lambda('id', q.Not(q.Exists(q.Ref(q.Collection(q.Var('collection')), q.Var('id')))))), null)
+            },
+            q.If(q.IsNull(q.Var('availableId')), null, q.Ref(q.Collection(q.Var('collection')), q.Var('availableId')))
+          )
+        )
+      )
+    }),
     dehash: q.CreateFunction({
       name: 'nanohash.dehash',
       body: q.Query(
