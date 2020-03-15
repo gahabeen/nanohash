@@ -18,6 +18,19 @@ declare module nanohash {
   type code = string
 }
 
+export const presets = {
+  HUMAN_READABLE_REF: {
+    // Let's you create a short readable folder reference (0/O and 1/I are banned)
+    alphabet: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
+    size: 5
+  },
+  SHORT_REF: {
+    // Let's you create a short code similar to youtube (ex: ysX7j1)
+    alphabet: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    size: 6
+  }
+}
+
 export function nanohash(options?: nanohash.options) {
   let { size = 6, maxSize = 9, hashtable = {}, alphabet, prefix = '1' } = options || {}
   if (maxSize > 9) maxSize = 9
