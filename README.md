@@ -2,6 +2,9 @@
 
 A tiny unique string ID generator including a matching 64-bit numeric value
 
+### Documentation
+[Check the doc: NanoHash](https://gahabeen.github.io/nanohash/classes/_index_.nanohash.html)
+
 ### Why?
 
 I created this lib to generate short codes _youtube-alike_ (ex: PkZNo7MFNFg). Except that in my case I made it possible from 1 to 9 characters maximum. The size of max 9 characters being due to the 64-bit numeric limitation of [**Fauna Document Id**](fauna.com) which is a **Long** number (A 64-bit signed decimal integer number.).
