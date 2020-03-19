@@ -1,7 +1,7 @@
 {
   "name": "nanohash",
   "description": "Generate 64bits-based numeric ids readable as short strings too!",
-  "version": "0.0.15",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "license": "MIT",
   "keywords": [
