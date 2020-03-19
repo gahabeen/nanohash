@@ -1,5 +1,5 @@
 const { nanohash } = require('./../dist')
-const nhash = nanohash({ size: 6 })
+const nhash = nanohash({ size: 5 })
 
 const ID = nhash.generate()
 console.log('ID', ID)
