@@ -1,0 +1,193 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>nanohash</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">nanohash</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>nanohash</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#nanohash" id="nanohash" style="color: inherit; text-decoration: none;">
+					<h2>nanohash</h2>
+				</a>
+				<p>A tiny unique string ID generator including a matching 64-bit numeric value</p>
+				<a href="#why" id="why" style="color: inherit; text-decoration: none;">
+					<h3>Why?</h3>
+				</a>
+				<p>I created this lib to generate short codes <em>youtube-alike</em> (ex: PkZNo7MFNFg). Except that in my case I made it possible from 1 to 9 characters maximum. The size of max 9 characters being due to the 64-bit numeric limitation of <a href="fauna.com"><strong>Fauna Document Id</strong></a> which is a <strong>Long</strong> number (A 64-bit signed decimal integer number.).</p>
+				<p>You can create a document with a given ID and reverse it back and forth from an ID to a short-code.</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> { nanohash } = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nanohash'</span>)
+
+<span class="hljs-comment">// The default alphabet used to generate short-codes is a-zA-Z0-0</span>
+<span class="hljs-comment">// If you wanna pick wisely the size of your codes regarding to the alphabet used I strongly recommand you to go and check https://zelark.github.io/nano-id-cc/.</span>
+<span class="hljs-comment">// Also even if you were to create and already existing code you could simply create another one as a fallback (or already provide a list of several codes to pick from).</span>
+
+<span class="hljs-keyword">const</span> nhash = nanohash({ <span class="hljs-attr">size</span>: <span class="hljs-number">6</span> })
+
+<span class="hljs-keyword">const</span> id = nhash.generate()
+<span class="hljs-comment">// output: 1342859071901</span>
+
+<span class="hljs-keyword">const</span> shortCode = nhash.dehash(id)
+<span class="hljs-comment">// output: ysX7j1</span>
+
+<span class="hljs-keyword">const</span> backToId = nhash.hash(shortCode)
+<span class="hljs-comment">// output: 1342859071901</span>
+<span class="hljs-comment">// same as id</span></code></pre>
+				<p>It&#39;s then easy to create documents using the generated ids (knowing they have already corresponding reversible short-codes).</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> fauna = <span class="hljs-built_in">require</span>(<span class="hljs-string">'faunadb'</span>)
+<span class="hljs-keyword">const</span> q = fauna.query
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> fauna.Client({ <span class="hljs-attr">secret</span>: <span class="hljs-string">'your-secret'</span> })
+
+<span class="hljs-comment">// create a user document</span>
+client.query(q.Create(q.Ref(q.Collection(<span class="hljs-string">'users'</span>), nhash.generate()), { <span class="hljs-attr">data</span>: { <span class="hljs-attr">name</span>: <span class="hljs-string">'Joe'</span> } }))
+
+<span class="hljs-comment">// create a note document</span>
+client.query(q.Create(q.Ref(q.Collection(<span class="hljs-string">'notes'</span>), nhash.generate()), { <span class="hljs-attr">data</span>: { <span class="hljs-attr">owner</span>: q.Ref(q.Collection(<span class="hljs-string">'users'</span>), <span class="hljs-string">'1342859071901'</span>) } }))
+
+<span class="hljs-comment">//...</span>
+
+<span class="hljs-comment">// in your page url you can include the converted code</span>
+<span class="hljs-comment">// for your user ID</span>
+<span class="hljs-keyword">const</span> userCode = nhash.dehash(<span class="hljs-string">'1342859071901'</span>)
+<span class="hljs-comment">// output: ysX7j1</span>
+
+<span class="hljs-comment">// and your note ID</span>
+<span class="hljs-keyword">const</span> noteCode = nhash.dehash(<span class="hljs-string">'1304807441806'</span>)
+<span class="hljs-comment">// output: uM7Ii6</span>
+
+<span class="hljs-comment">/*
+  We could easily imagine then to have your routes in your front set as follows:
+  myapp.com/users/&lt;userCode&gt;/notes/&lt;noteCode&gt; 
+  ex: myapp.com/users/ysX7j1/notes/uM7Ii6 
+*/</span></code></pre>
+				<p>You can also play with bulk generation to create several documents or do retries if a creation fails for an existing ID.</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> codes = nhash.bulk()
+<span class="hljs-comment">/* output: [
+  '1342859071901',
+  '1304807441806',
+  '1160506510704',
+  '1295220296107',
+  '1312555266027',
+  '1344940551137',
+  '1090639062514',
+  '1435957560823',
+  '1135840001452',
+  '1180647530040'
+]
+*/</span></code></pre>
+				<a href="#dehash-an-id-straight-in-a-fauna-user-defined-function" id="dehash-an-id-straight-in-a-fauna-user-defined-function" style="color: inherit; text-decoration: none;">
+					<h3>Dehash an ID straight in a Fauna User-Defined Function</h3>
+				</a>
+				<p>You can scaffold the creation of the functions required to dehash an ID wherever you want in your Fauna FQL queries by doing as follow.</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> fauna = <span class="hljs-built_in">require</span>(<span class="hljs-string">'faunadb'</span>)
+<span class="hljs-keyword">const</span> q = fauna.query
+<span class="hljs-keyword">const</span> client = <span class="hljs-keyword">new</span> fauna.Client({ <span class="hljs-attr">secret</span>: <span class="hljs-string">'your-secret'</span> })
+
+<span class="hljs-keyword">const</span> NanoHash = <span class="hljs-built_in">require</span>(<span class="hljs-string">'nanohash'</span>)
+
+client.query(NanoHash.fauna.scaffold(q))
+<span class="hljs-comment">// Check fauna.scaffold() function to learn more about what's being created.</span></code></pre>
+				<p>You can then use <code>Call(&quot;nanohash.dehash&quot;,[&quot;1342859071901&quot;])</code> to retrieve <code>ysX7j1</code>.</p>
+				<a href="#this-is-a-draft" id="this-is-a-draft" style="color: inherit; text-decoration: none;">
+					<h3>This is a draft.</h3>
+				</a>
+				<p>I&#39;ve been wanting to use a short string as unique ID for Fauna but couldn&#39;t because of the numeric only restriction. I&#39;m not sure when (or if) it&#39;s gonne change on Fauna&#39;s end and I find it silly to have a generated ID by Fauna AND and another unique code in addition.</p>
+				<p>At least this lib will fill this gap for my use cases and maybe yours. </p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_fauna_.html">&quot;fauna&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_hashtable_.html">&quot;hashtable&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

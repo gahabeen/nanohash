@@ -59,3 +59,15 @@ describe('nanohash.dehash()', () => {
     expect(nhash.dehash(nhash.hash('HXVU8nyTr'))).toBe('HXVU8nyTr')
   })
 })
+
+describe('nanohash.faunaCode()', () => {
+  const nhash = nanohash()
+  test('should, for an even number string, return a reversible code to nanohash.faunaId()', async () => {
+    const id = '258296287713034771'
+    expect(nhash.faunaId(nhash.faunaCode(id))).toBe(id)
+  })
+  test('should, for an odd number string, return a reversible code to nanohash.faunaId()', async () => {
+    const id = '1258296287713034771'
+    expect(nhash.faunaId(nhash.faunaCode(id))).toBe(id)
+  })
+})

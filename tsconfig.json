@@ -6,8 +6,13 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "rootDir": "src",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["./src/index.ts", "./src/fauna.ts"],
-  "exclude": ["node_modules", "./src/**/*/test.ts"]
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules", "./src/**/*/test.ts"],
+  "typedocOptions": {
+    "mode": "modules",
+    "out": "docs"
+  }
 }
