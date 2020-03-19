@@ -1,21 +1,41 @@
 import nanoid from 'nanoid/generate'
 import * as fauna from './fauna'
+import { hashtable as defaultHashtable, hashtable99, reversedNumbers } from './hashtable'
 
-declare module nanohash {
+function inverseTable(htable) {
+  return Object.entries(htable).reduce((table: any, [key, code]) => {
+    table[code as string] = key
+    return table
+  }, {})
+}
+
+declare module NanoHash {
   interface options {
+    // The alphabet you want to use
     alphabet?: string
-    hashtable?: hashtable
+    // The length of the codes to generate
     size?: number
     maxSize?: number
+    hashtable?: hashObject
     prefix?: string
   }
 
-  interface hashtable {
+  interface hashObject {
     [key: string]: string
   }
 
   type ID = string
   type code = string
+
+  type FaunaID = string
+  type FaunaCode = string
+
+  type GenerateMethod = (...args: any[]) => any
+  type BulkMethod = (...args: any[]) => any
+  type HashMethod = (...args: any[]) => any
+  type DehashMethod = (...args: any[]) => any
+  type FaunaIdMethod = (...args: any[]) => any
+  type FaunaCodeMethod = (...args: any[]) => any
 }
 
 export const presets = {
@@ -31,106 +51,98 @@ export const presets = {
   }
 }
 
-export function nanohash(options?: nanohash.options) {
-  let { size = 6, maxSize = 9, hashtable = {}, alphabet, prefix = '1' } = options || {}
-  if (maxSize > 9) maxSize = 9
-  if (size > maxSize) throw new Error(`Size cannot be higher than ${maxSize}`)
+/**
+ * Creates an instance of nanohash based on size and alphabet needs
+ * @example
+ * 
+ * ```javascript
+ * const nhash = nanohash({ size: 6, alphabet: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" })
+ * ```
+ */
+export class NanoHash {
+  size: number = 6
+  maxSize: number = 9
+  alphabet: string = presets.SHORT_REF.alphabet
+  prefix: string = '1'
 
-  hashtable = Object.assign(
-    {
-      '0': '00',
-      '1': '01',
-      '2': '02',
-      '3': '03',
-      '4': '04',
-      '5': '05',
-      '6': '06',
-      '7': '07',
-      '8': '08',
-      '9': '09',
-      a: '10',
-      b: '11',
-      c: '12',
-      d: '13',
-      e: '14',
-      f: '15',
-      g: '16',
-      h: '17',
-      i: '18',
-      j: '19',
-      k: '20',
-      l: '21',
-      m: '22',
-      n: '23',
-      o: '24',
-      p: '25',
-      q: '26',
-      r: '27',
-      s: '28',
-      t: '29',
-      u: '30',
-      v: '31',
-      w: '32',
-      x: '33',
-      y: '34',
-      z: '35',
-      A: '36',
-      B: '37',
-      C: '38',
-      D: '39',
-      E: '40',
-      F: '41',
-      G: '42',
-      H: '43',
-      I: '44',
-      J: '45',
-      K: '46',
-      L: '47',
-      M: '48',
-      N: '49',
-      O: '50',
-      P: '51',
-      Q: '52',
-      R: '53',
-      S: '54',
-      T: '55',
-      U: '56',
-      V: '57',
-      W: '58',
-      X: '59',
-      Y: '60',
-      Z: '61'
-    },
-    hashtable || {}
-  )
+  hashtable: object
+  codetable: object
+  hashtable99: object
+  codetable99: object
 
-  alphabet = alphabet || Object.keys(hashtable).join('')
+  constructor(options: NanoHash.options = {}) {
+    let { size = presets.SHORT_REF.size, maxSize = 9, hashtable = {}, alphabet = presets.SHORT_REF.alphabet } = options
 
-  const codetable = Object.entries(hashtable).reduce((table: any, [key, code]) => {
-    table[code] = key
-    return table
-  }, {})
+    if (maxSize > 9) {
+      this.maxSize = 9
+    }
 
-  function generate(): nanohash.ID {
-    return hash(nanoid(alphabet as string, size))
+    if (size > maxSize) {
+      throw new Error(`Size cannot be higher than ${maxSize}`)
+    }
+
+    this.size = size
+    this.alphabet = alphabet
+
+    this.hashtable = Object.assign(defaultHashtable, hashtable || {})
+    this.codetable = inverseTable(this.hashtable)
+
+    this.hashtable99 = hashtable99
+    this.codetable99 = inverseTable(this.hashtable99)
   }
 
-  function bulk(nb: number = 10): nanohash.ID[] {
-    return Array(nb)
+  /**
+   * Generates a unique numeric string ID (reversible to code)
+   *
+   * @returns {NanoHash.ID}
+   *
+   * @example
+   *
+   *    const code = nhash.generate()
+   *    // output: Xe7ZRY
+   */
+  generate: NanoHash.GenerateMethod = (): NanoHash.ID => {
+    return this.hash(nanoid(this.alphabet, this.size))
+  }
+
+  /**
+   * Generates n iterations of unique numeric string ID (each reversible to code)
+   *
+   * @param {number} [n=10]
+   * @returns {NanoHash.ID[]}
+   *
+   * @example
+   *
+   *    const code = nhash.bulk(5)
+   *    // output: [ '1075226254449', '1563743314555', '1015201022261', '1271320203729', '1465116152533' ]
+   */
+  bulk: NanoHash.BulkMethod = (n: number = 10): NanoHash.ID[] => {
+    return Array(n)
       .fill(undefined)
-      .map(generate)
+      .map(this.generate)
   }
 
-  function hash(code: nanohash.code): nanohash.ID {
-    if (code.length > maxSize) throw new Error(`Code cannot be longer than ${maxSize}`)
+  /**
+   * Convert a string code to a numeric string ID (reversible)
+   *
+   * @param {NanoHash.code} code
+   * @returns {NanoHash.ID}
+   *
+   * @example
+   *
+   *    const countryID = nhash.hash("France")
+   *    // output: 1412710231214
+   */
+  hash: NanoHash.HashMethod = (code: NanoHash.code): NanoHash.ID => {
+    if (code.length > this.maxSize) throw new Error(`Code cannot be longer than ${this.maxSize}`)
     let firstNumberAlphabet = '12345678'
     return (
-      (firstNumberAlphabet.includes(prefix) ? prefix : '1') +
-      code
+      (firstNumberAlphabet.includes(this.prefix) ? this.prefix : '1') +
+      `${code}`
         .split('')
         .map((c) => {
           try {
-            return hashtable[c]
+            return this.hashtable[c]
           } catch (error) {
             throw new Error(`The character: ${c} can't be used`)
           }
@@ -139,18 +151,24 @@ export function nanohash(options?: nanohash.options) {
     )
   }
 
-  function dehash(id: nanohash.ID = ''): nanohash.code {
-    // try {
-    //   Number(id)
-    // } catch (error) {
-    //   throw new Error(`ID ${id} can't be cast to Number. The ID must be wrong.`)
-    // }
-    return id
+  /**
+   * Returns a code from an ID (made from .hash() or .generate())
+   *
+   * @param {NanoHash.ID} [id='']
+   * @returns {NanoHash.code}
+   *
+   * @example
+   *
+   *    const countryName = nhash.dehash("1412710231214")
+   *    // output: France
+   */
+  dehash: NanoHash.DehashMethod = (id: NanoHash.ID = ''): NanoHash.code => {
+    return `${id}`
       .slice(1)
       .match(/.{1,2}/g)
       .map((c) => {
         try {
-          return codetable[c]
+          return this.codetable[c]
         } catch (error) {
           throw new Error(`The code: ${c} doesn't exist`)
         }
@@ -158,12 +176,86 @@ export function nanohash(options?: nanohash.options) {
       .join('')
   }
 
-  return {
-    generate,
-    bulk,
-    hash,
-    dehash
+  /**
+   * Returns a code from a Fauna ID (generated by Fauna)
+   *
+   * @param {NanoHash.FaunaID} faunaId
+   * @returns {NanoHash.FaunaCode}
+   *
+   * @example
+   *
+   *    const code = nhash.faunaCode("258296287713034771")
+   *    // output: эh3ъmöýRt
+   */
+  faunaCode: NanoHash.FaunaCodeMethod = (faunaId: NanoHash.FaunaID): NanoHash.FaunaCode => {
+    let id = `${faunaId}`
+    let firstCharacter = ''
+    let isOdd = id.length % 2 > 0
+    if (isOdd) {
+      firstCharacter = id.slice(0, 1)
+      try {
+        firstCharacter = reversedNumbers[firstCharacter]
+      } catch (error) {
+        console.error(`Couldn't find ${firstCharacter} in reversedNumbers hash`)
+      }
+      id = id.slice(1)
+    }
+    return (
+      firstCharacter +
+      id
+        .match(/.{1,2}/g)
+        .map((c) => {
+          try {
+            return this.codetable99[c]
+          } catch (error) {
+            throw new Error(`The code: ${c} doesn't exist`)
+          }
+        })
+        .join('')
+    )
+  }
+
+  /**
+   * Returns a Fauna ID from a code (from .faunaCode())
+   *
+   * @param {NanoHash.FaunaCode} faunaCode
+   * @returns {NanoHash.FaunaID}
+   *
+   * @example
+   *
+   *    const faunaID = nhash.faunaId("эh3ъmöýRt")
+   *    // output: 258296287713034771
+   */
+  faunaId: NanoHash.FaunaIdMethod = (faunaCode: NanoHash.FaunaCode): NanoHash.FaunaID => {
+    let code = `${faunaCode}`
+    let firstCharacter = ''
+    let hasSpecialFirstCharacter = code.startsWith('_')
+    if (hasSpecialFirstCharacter) {
+      firstCharacter = code.slice(0, 2)
+      const reversedNumbersCodeTable = inverseTable(reversedNumbers)
+      try {
+        firstCharacter = reversedNumbersCodeTable[firstCharacter]
+      } catch (error) {
+        console.error(`Couldn't find ${firstCharacter} in reversedNumbers hash`)
+      }
+      code = code.slice(2)
+    }
+    return (
+      firstCharacter +
+      code
+        .split('')
+        .map((c) => {
+          try {
+            return hashtable99[c]
+          } catch (error) {
+            throw new Error(`The character: ${c} can't be used`)
+          }
+        })
+        .join('')
+    )
   }
 }
+
+export const nanohash = (...args: any[]) => new NanoHash(...args)
 
 export { fauna }
