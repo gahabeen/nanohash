@@ -54,7 +54,7 @@ export const presets = {
 /**
  * Creates an instance of nanohash based on size and alphabet needs
  * @example
- * 
+ *
  * ```javascript
  * const nhash = nanohash({ size: 6, alphabet: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" })
  * ```
@@ -113,8 +113,10 @@ export class NanoHash {
    *
    * @example
    *
-   *    const code = nhash.bulk(5)
-   *    // output: [ '1075226254449', '1563743314555', '1015201022261', '1271320203729', '1465116152533' ]
+   * ```javascript
+   * const code = nhash.bulk(5)
+   * // output: [ '1075226254449', '1563743314555', '1015201022261', '1271320203729', '1465116152533' ]
+   * ```
    */
   bulk: NanoHash.BulkMethod = (n: number = 10): NanoHash.ID[] => {
     return Array(n)
@@ -130,8 +132,10 @@ export class NanoHash {
    *
    * @example
    *
-   *    const countryID = nhash.hash("France")
-   *    // output: 1412710231214
+   * ```javascript
+   * const countryID = nhash.hash("France")
+   * // output: 1412710231214
+   * ```
    */
   hash: NanoHash.HashMethod = (code: NanoHash.code): NanoHash.ID => {
     if (code.length > this.maxSize) throw new Error(`Code cannot be longer than ${this.maxSize}`)
@@ -159,8 +163,10 @@ export class NanoHash {
    *
    * @example
    *
-   *    const countryName = nhash.dehash("1412710231214")
-   *    // output: France
+   * ```javascript
+   * const countryName = nhash.dehash("1412710231214")
+   * // output: France
+   * ```
    */
   dehash: NanoHash.DehashMethod = (id: NanoHash.ID = ''): NanoHash.code => {
     return `${id}`
@@ -184,8 +190,10 @@ export class NanoHash {
    *
    * @example
    *
-   *    const code = nhash.faunaCode("258296287713034771")
-   *    // output: эh3ъmöýRt
+   * ```javascript
+   * const code = nhash.faunaCode("258296287713034771")
+   * // output: эh3ъmöýRt
+   * ```
    */
   faunaCode: NanoHash.FaunaCodeMethod = (faunaId: NanoHash.FaunaID): NanoHash.FaunaCode => {
     let id = `${faunaId}`
@@ -223,8 +231,10 @@ export class NanoHash {
    *
    * @example
    *
-   *    const faunaID = nhash.faunaId("эh3ъmöýRt")
-   *    // output: 258296287713034771
+   * ```javascript
+   * const faunaID = nhash.faunaId("эh3ъmöýRt")
+   * // output: 258296287713034771
+   * ```
    */
   faunaId: NanoHash.FaunaIdMethod = (faunaCode: NanoHash.FaunaCode): NanoHash.FaunaID => {
     let code = `${faunaCode}`
