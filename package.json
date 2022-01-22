@@ -22,7 +22,7 @@
     "pub": "yarn gen && yarn publish"
   },
   "dependencies": {
-    "nanoid": "^2.1.11"
+    "nanoid": "^3.1.31"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
